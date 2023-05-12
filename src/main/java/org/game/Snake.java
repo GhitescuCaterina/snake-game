@@ -1,90 +1,157 @@
 package org.game;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
+
+import javax.sound.midi.Soundbank;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.net.SocketTimeoutException;
 
 public class Snake {
-    private static final int INITIAL_LENGTH = 3;
-    private static final int BODY_SIZE = 20;
+    public Rect[] body = new Rect[100];
+    public double bodyWidth, bodyHeight;
 
-    private List<Point> body;
-    private Direction direction;
+    public int size;
+    public int tail = 0;
+    public int head = 0;
 
-    public Snake() {
-        body = new ArrayList<>();
-        direction = Direction.RIGHT;
+    public Direction direction = Direction.RIGHT;
+    public double ogWaitBetweenUpdates = 0.075f;
+    public double waitTimeLeft = ogWaitBetweenUpdates;
+    public Rect background;
 
-        // Initialize the snake with an initial length and position
-        for (int i = 0; i < INITIAL_LENGTH; i++) {
-            body.add(new Point(i, 0));
+    public Snake(int size, double startX, double startY, double bodyWidth, double bodyHeight, Rect background) {
+        this.size = size;
+        this.bodyWidth = bodyWidth;
+        this.bodyHeight = bodyHeight;
+        this.background=background;
+
+        for(int i =0; i <= size; i++) {
+            Rect bodyPiece = new Rect(startX + i*bodyWidth, startY, bodyWidth, bodyHeight, direction);
+            body[i] = bodyPiece;
+            head++;
         }
+        head--;
     }
 
-    public List<Point> getBody() {
-        return body;
+    public void changeDirection (Direction newDirection){
+        if(newDirection == Direction.RIGHT && direction!= Direction.LEFT)
+            direction=newDirection;
+        else if(newDirection == Direction.LEFT && direction!= Direction.RIGHT)
+            direction= newDirection;
+        else if(newDirection == Direction.UP && direction!= Direction.DOWN)
+            direction= newDirection;
+        else if(newDirection == Direction.DOWN && direction!= Direction.UP)
+            direction=newDirection;
     }
 
-    public void move() {
-        Point head = body.get(0);
-        int x = head.x;
-        int y = head.y;
-
-        // Update the head position based on the current direction
-        switch (direction) {
-            case UP:
-                y--;
-                break;
-            case DOWN:
-                y++;
-                break;
-            case LEFT:
-                x--;
-                break;
-            case RIGHT:
-                x++;
-                break;
+    public void update(double dt){
+        if(waitTimeLeft > 0){
+            waitTimeLeft -= dt;
+            return;
         }
 
-        // Create a new head with the updated position
-        Point newHead = new Point(x, y);
-
-        // Move the snake by adding the new head at the front and removing the tail
-        body.add(0, newHead);
-        body.remove(body.size() - 1);
-    }
-
-    public void setDirection(int keyCode) {
-        Direction newDirection = Direction.fromKeyCode(keyCode);
-
-        if (newDirection != null) {
-            // Prevent the snake from reversing its direction completely
-            if (direction == Direction.UP && newDirection != Direction.DOWN
-                    || direction == Direction.DOWN && newDirection != Direction.UP
-                    || direction == Direction.LEFT && newDirection != Direction.RIGHT
-                    || direction == Direction.RIGHT && newDirection != Direction.LEFT) {
-                direction = newDirection;
-            }
+        if(intersectingWithSelf()){
+            Window.getWindow().changeState(0);
         }
+
+        waitTimeLeft= ogWaitBetweenUpdates;
+        double newX= 0;
+        double newY = 0;
+
+        if(direction == Direction.RIGHT){
+            newX = body[head].x + bodyWidth;
+            newY = body[head].y;
+        }else if (direction == Direction.LEFT){
+            newX = body[head].x - bodyWidth;
+            newY = body[head].y;
+        }
+        else if (direction == Direction.UP){
+            newX = body[head].x;
+            newY = body[head].y - bodyHeight;
+        }
+        else if (direction == Direction.DOWN){
+            newX = body[head].x;
+            newY = body[head].y + bodyHeight;
+        }
+//        System.out.println(newX);
+//        System.out.println(newY);
+
+        body[(head + 1) % body.length] = body[tail];
+        body[tail] = null;
+        head = (head + 1) % body.length;
+        tail = (tail + 1) % body.length;
+
+        body[head].x= newX;
+        body[head].y= newY;
+
+
     }
 
-    public void grow() {
-        // Add a new tail segment to the snake
-        Point tail = body.get(body.size() - 1);
-        body.add(new Point(tail));
+    public boolean intersectingWithSelf(){
+        Rect headR = body[head];
+        return intersectingWithRect(headR) || intersectingWithScreenBoundaries(headR);
     }
 
-    public void render(Graphics g) {
-        for (Point segment : body) {
-            int x = segment.x * BODY_SIZE;
-            int y = segment.y * BODY_SIZE;
+    public boolean intersectingWithRect(Rect rect){
+        for(int i = tail; i!= head; i = (i+1) % body.length){
+            if(intersecting(rect, body[i])) return true;
+        }
+        return false;
+    }
 
-            // Draw each segment as a square on the game board
-            g.setColor(Color.GREEN);
-            g.fillRect(x, y, BODY_SIZE, BODY_SIZE);
-            g.setColor(Color.BLACK);
-            g.drawRect(x, y, BODY_SIZE, BODY_SIZE);
+    public boolean intersectingWithScreenBoundaries(Rect head) {
+        return (head.x < background.x || (head.x + head.width) > background.x + background.width ||
+                head.y < background.y || (head.y + head.height) > background.y + background.height);
+    }
+
+    public void grow(){
+        double newX = 0;
+        double newY = 0;
+
+        if(direction == Direction.RIGHT){
+            newX = body[tail].x - bodyWidth;
+            newY = body[tail].y;
+        }else if (direction == Direction.LEFT){
+            newX = body[tail].x + bodyWidth;
+            newY = body[tail].y;
+        }
+        else if (direction == Direction.UP){
+            newX = body[tail].x;
+            newY = body[tail].y + bodyHeight;
+        }
+        else if (direction == Direction.DOWN){
+            newX = body[tail].x;
+            newY = body[tail].y - bodyHeight;
+        }
+
+        Direction rDirection = Direction.LEFT;
+        if (direction == Direction.RIGHT) rDirection=Direction.LEFT;
+        else if (direction == Direction.LEFT) rDirection=Direction.RIGHT;
+        else if (direction == Direction.UP) rDirection=Direction.DOWN;
+        else if (direction == Direction.DOWN) rDirection=Direction.UP;
+
+        Rect newBodyPiece = new Rect(newX, newY, bodyWidth, bodyHeight, rDirection);
+        tail = (tail - 1) % body.length;
+        body[tail] = newBodyPiece;
+
+    }
+
+    public boolean intersecting(Rect r1, Rect r2){
+        return (r1.x >= r2.x && r1.x + r1.width <= r2.x+r2.width &&
+                r1.y >= r2.y && r1.y + r1.height <= r2.y + r2.height);
+    }
+
+    public void draw(Graphics2D g2){
+        for(int i = tail; i!= head; i = (i+1) % body.length){
+            Rect piece = body[i];
+            double subWidth = (piece.width - 6.0)/2.0;
+            double subHeight = (piece.height - 6.0)/2.0;
+
+            g2.setColor(Color.GREEN);
+            g2.fill(new Rectangle2D.Double(piece.x + 2.0, piece.y + 2.0, subWidth, subHeight));
+            g2.fill(new Rectangle2D.Double(piece.x + 4.0 + subWidth, piece.y + 2.0, subWidth, subHeight));
+            g2.fill(new Rectangle2D.Double(piece.x + 2.0, piece.y + 4.0 + subHeight, subWidth, subHeight));
+            g2.fill(new Rectangle2D.Double(piece.x + 4.0 + subWidth, piece.y + 4.0 + subHeight, subWidth, subHeight));
+
         }
     }
 }

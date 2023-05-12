@@ -1,35 +1,49 @@
 package org.game;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.util.Random;
+
+import java.awt.*;
 
 public class Food {
-    private static final int SIZE = 20;
+    public Rect background;
+    public Snake snake;
+    public int width, height;
+    public Color color;
+    public Rect rect;
+    public int xPadding;
+    public boolean isSpawned = false;
 
-    private Point position;
-    private Random random;
+    public Food(Rect background, Snake snake, int width, int height, Color color){
+        this.background = background;
+        this.snake= snake;
+        this.width= width;
+        this.height=height;
+        this.color=color;
+        this.rect= new Rect(0,0,width,height, snake.direction);
 
-    public Food() {
-        position = new Point();
-        random = new Random();
+        xPadding = (int)((Constant.TILE_WIDTH - this.width) / 2.0);
     }
 
-    public Point getPosition() {
-        return position;
+    public void spawn(){
+
+        do{
+            double randX = (int)(Math.random() * (int)(background.width/Constant.TILE_WIDTH)) * Constant.TILE_WIDTH + background.x;
+            double randY = (int)(Math.random() * (int)(background.height/Constant.TILE_WIDTH)) * Constant.TILE_WIDTH + background.y;
+            this.rect.x=randX;
+            this.rect.y=randY;
+        } while(snake.intersectingWithRect(this.rect));
+        this.isSpawned = true;
     }
 
-    public void generateRandomPosition(int boardWidth, int boardHeight) {
-        int x = random.nextInt(boardWidth);
-        int y = random.nextInt(boardHeight);
-        position.setLocation(x, y);
+    public void update(double dt){
+        if(snake.intersectingWithRect(this.rect)){
+            snake.grow();
+            this.rect.x= -100;
+            this.rect.y= -100;
+            isSpawned = false;
+        }
     }
 
-    public void render(Graphics g) {
-        int x = position.x * SIZE;
-        int y = position.y * SIZE;
-
-        g.setColor(Color.RED);
-        g.fillOval(x, y, SIZE, SIZE);
+    public void draw(Graphics2D g2){
+        g2.setColor(color);
+        g2.fillRect((int)this.rect.x + xPadding,(int)this.rect.y + xPadding,width, height);
     }
 }
