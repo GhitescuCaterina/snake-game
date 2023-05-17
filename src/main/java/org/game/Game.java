@@ -40,7 +40,7 @@ public class Game extends Scene{
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D)g;
 
-        g.setColor(new Color(38, 38, 38));
+        g.setColor(new Color(70, 70, 70));
         g2.fill(new Rectangle2D.Double(background.x, background.y, background.width, background.height));
 
         g2.setColor(Color.white);
