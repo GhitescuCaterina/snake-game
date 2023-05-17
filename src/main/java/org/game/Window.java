@@ -8,7 +8,7 @@ import java.awt.Image;
 public class Window extends JFrame implements Runnable {
 
     public static Window window = null;
-    public int curentState;
+    public int currentState;
     public Scene currentScene;
     public boolean isRunning = true;
 
@@ -43,8 +43,8 @@ public class Window extends JFrame implements Runnable {
     }
 
     public void changeState(int newState){
-        curentState = newState;
-        switch(curentState){
+        currentState = newState;
+        switch(currentState){
             case 0:
                 currentScene = new MainMenu(keyListener, mouseListener);
                 break;

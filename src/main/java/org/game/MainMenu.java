@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.awt.Cursor;
 
 public class MainMenu extends Scene{
 
@@ -21,13 +22,13 @@ public class MainMenu extends Scene{
         this.keyListener = keyListener;
         this.mouseListener = mouseListener;
         try{
-            title = ImageIO.read(new File("")); //schimbare pozele
-            play = ImageIO.read(new File(""));
-            playPressed = ImageIO.read(new File(""));
-            learn = ImageIO.read(new File(""));
-            learnPressed = ImageIO.read(new File(""));
-            exit = ImageIO.read(new File(""));
-            exitPressed = ImageIO.read(new File(""));
+            title = ImageIO.read(new File("pictures/title.png"));
+            play = ImageIO.read(new File("pictures/start.png"));
+            playPressed = ImageIO.read(new File("pictures/start-pressed.png"));
+            learn = ImageIO.read(new File("pictures/learn.png"));
+            learnPressed = ImageIO.read(new File("pictures/learn-pressed.png"));
+            exit =ImageIO.read(new File("pictures/exit.png"));
+            exitPressed = ImageIO.read(new File("pictures/exit-pressed.png"));
 
         }catch(Exception e){
             e.printStackTrace();
@@ -43,6 +44,7 @@ public class MainMenu extends Scene{
         exitRect = new Rect(525, 650, 250, 75, Direction.UP);
 
     }
+
     @Override
     public void update(double dt) {
         if(mouseListener.getX() >= playRect.x && mouseListener.getX() <= playRect.x + playRect.width &&
@@ -62,7 +64,6 @@ public class MainMenu extends Scene{
             learnCurrentImage = learn;
         }
 
-
         if(mouseListener.getX() >= exitRect.x && mouseListener.getX() <= exitRect.x + exitRect.width &&
                 mouseListener.getY() >= exitRect.y && mouseListener.getY() <= exitRect.y + exitRect.height) {
             exitCurrentImage = exitPressed;
@@ -72,12 +73,41 @@ public class MainMenu extends Scene{
             exitCurrentImage = exit;
         }
 
+        checkMouseAndSetCursor(playRect, playCurrentImage, playPressed);
+        checkMouseAndSetCursor(learnRect, learnCurrentImage, learnPressed);
+        checkMouseAndSetCursor(exitRect, exitCurrentImage, exitPressed);
+
+        if(mouseListener.isPressed()) {
+            if (playCurrentImage == playPressed) {
+                Window.getWindow().changeState(1);
+            } else if (exitCurrentImage == exitPressed) {
+                Window.getWindow().close();
+            }
+        }
+    }
+
+    private void checkMouseAndSetCursor(Rect rect, BufferedImage currentImage, BufferedImage pressedImage) {
+        Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+        Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
+
+        if(mouseListener.getX() >= rect.x && mouseListener.getX() <= rect.x + rect.width &&
+                mouseListener.getY() >= rect.y && mouseListener.getY() <= rect.y + rect.height) {
+            currentImage = pressedImage;
+            Window.getWindow().setCursor(handCursor); // cursor pointer
+        } else {
+            Window.getWindow().setCursor(defaultCursor); // cursor normal
+        }
     }
 
     @Override
     public void draw(Graphics g) {
         g.setColor(new Color(95, 134, 59));
         g.fillRect(0, 0 , Constant.SCREEN_WIDTH, Constant.SCREEN_HEIGHT);
+
+        titleRect = new Rect((Constant.SCREEN_WIDTH - titleRect.width) / 2, 60, 630,300 , Direction.UP);
+        playRect = new Rect((Constant.SCREEN_WIDTH - playRect.width) / 2, 380, 800,100, Direction.UP );
+        learnRect = new Rect((Constant.SCREEN_WIDTH - learnRect.width) / 2, 480, 800,100, Direction.UP);
+        exitRect = new Rect((Constant.SCREEN_WIDTH - exitRect.width) / 2, 580, 800, 100, Direction.UP);
 
         g.drawImage(title, (int)titleRect.x, (int)titleRect.y, (int)titleRect.width, (int)titleRect.height, null);
         g.drawImage(playCurrentImage, (int)playRect.x, (int)playRect.y, (int)playRect.width, (int)playRect.height, null);
