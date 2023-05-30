@@ -2,11 +2,8 @@ package org.game;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.awt.Cursor;
 
 public class MainMenu extends Scene{
 
@@ -27,7 +24,7 @@ public class MainMenu extends Scene{
             playPressed = ImageIO.read(new File("pictures/start-pressed.png"));
             learn = ImageIO.read(new File("pictures/learn.png"));
             learnPressed = ImageIO.read(new File("pictures/learn-pressed.png"));
-            exit =ImageIO.read(new File("pictures/exit.png"));
+            exit = ImageIO.read(new File("pictures/exit.png"));
             exitPressed = ImageIO.read(new File("pictures/exit-pressed.png"));
 
         }catch(Exception e){
@@ -44,7 +41,6 @@ public class MainMenu extends Scene{
         exitRect = new Rect(525, 650, 250, 75, Direction.UP);
 
     }
-
     @Override
     public void update(double dt) {
         if(mouseListener.getX() >= playRect.x && mouseListener.getX() <= playRect.x + playRect.width &&

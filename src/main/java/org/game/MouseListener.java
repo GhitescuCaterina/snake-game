@@ -26,7 +26,7 @@ public class MouseListener  extends MouseAdapter implements MouseMotionListener 
 
     public double getX() {return this.x;}
     public double getY() {return this.y;}
+    public double getMouseX() {return this.x;}
+    public double getMouseY() {return this.y;}
     public boolean isPressed() {return this.isPressed;}
-
-
 }

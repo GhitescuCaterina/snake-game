@@ -1,6 +1,6 @@
 package org.game;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -8,12 +8,13 @@ import java.awt.Image;
 public class Window extends JFrame implements Runnable {
 
     public static Window window = null;
-    public int currentState;
+    public int curentState;
     public Scene currentScene;
     public boolean isRunning = true;
-
+    private GameOverScreen gameOverScreen;
     public KeyListener keyListener = new KeyListener();
     public MouseListener mouseListener = new MouseListener();
+    private Scene currentState;
     public Window(int width ,int height, String title){
         setSize(width, height);
         setTitle(title);
@@ -26,8 +27,8 @@ public class Window extends JFrame implements Runnable {
         addKeyListener(keyListener);
         addMouseListener(mouseListener);
         addMouseMotionListener(mouseListener);
-//        setOpacity(0.5f);
-//        setForeground(Color.black);
+
+        gameOverScreen = new GameOverScreen();
     }
 
     public static Window getWindow(){
@@ -43,15 +44,20 @@ public class Window extends JFrame implements Runnable {
     }
 
     public void changeState(int newState){
-        currentState = newState;
-        switch(currentState){
-            case 0:
-                currentScene = new MainMenu(keyListener, mouseListener);
-                break;
-            case 1:
+        curentState = newState;
+        switch (curentState) {
+            case 0 -> currentScene = new MainMenu(keyListener, mouseListener);
+            case 1 -> {
                 currentScene = new Game(keyListener);
-                break;
+                ((Game) currentScene).start();
+            }
+            case 2 -> currentScene = gameOverScreen;
         }
+    }
+
+    public void changePanel(JPanel newPanel) {
+        this.setContentPane(newPanel);
+        this.revalidate();
     }
 
     public void update(double dt){
@@ -62,11 +68,18 @@ public class Window extends JFrame implements Runnable {
         getGraphics().drawImage(dbImage, 0, 0, this);
 
         currentScene.update(dt);
+        if (curentState == 2) {
+            gameOverScreen.update();
+        }
     }
 
     public void draw(Graphics g){
         Graphics2D g2= (Graphics2D)g;
         currentScene.draw(g);
+
+        if (curentState == 2) {
+            gameOverScreen.draw(g2);
+        }
     }
 
     @Override

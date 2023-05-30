@@ -3,22 +3,62 @@ package org.game;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
-import java.awt.Color;
 
 public class Game extends Scene{
     KeyListener keyListener;
+    private ScoreRepository scoreRepository;
     Rect background, foreground, scoreboard;
-    Snake snake;
+    private Snake snake;
     public Food food;
+    private Game game;
+    private FoodManager foodManager;
+    private FoodType foodType;
+    private int score = 0;
+    private FoodKind foodKind;
+    private String playerName;
+    private Rect rect;
     public Game(KeyListener keyListener){
         background = new Rect(0,0,Constant.SCREEN_WIDTH, Constant.SCREEN_HEIGHT, Direction.UP);
-        foreground = new Rect(25, 48, Constant.TILE_WIDTH*31, Constant.TILE_WIDTH*31, Direction.UP);
-        scoreboard = new Rect(790, 48, Constant.TILE_WIDTH*16, Constant.TILE_WIDTH*31, Direction.UP);
-        snake = new Snake(5, 48, 48+24, 24, 24, foreground);
+        foreground = new Rect(24, 48, Constant.TILE_WIDTH*25, Constant.TILE_WIDTH*25, Direction.UP);
+        scoreboard = new Rect(790, 48, Constant.TILE_WIDTH*13, Constant.TILE_WIDTH*25, Direction.UP);
+        snake = new Snake(5, 48, 48+24, 24, 24, foreground, this);
         this.keyListener = keyListener;
-        food = new Food(foreground, snake, 12, 12, Color.RED);
-        food.spawn();
+        this.foodManager = new FoodManager(foreground, snake, (int) Constant.TILE_WIDTH, (int) Constant.TILE_WIDTH, this);
+        food = new Food(foreground, snake, (int) Constant.TILE_WIDTH, (int) Constant.TILE_WIDTH, this);
+        if(!food.isSpawned) food.spawn(foodType);
+
+        scoreRepository = new ScoreRepository();
     }
+
+    public void start() {
+        food = new Food(foreground, snake, (int) Constant.TILE_WIDTH, (int) Constant.TILE_WIDTH, this);
+        this.foodManager = new FoodManager(foreground, snake, (int) Constant.TILE_WIDTH, (int) Constant.TILE_WIDTH, this);
+    }
+
+//    public void endGame() {
+//        String playerName = // get the player's name
+//        int playerScore = // get the player's score
+//
+//                scoreRepository.insertScore(playerName, playerScore);
+//
+//        //... rest of game over logic
+//    }
+
+    public void incrementScore(Food food) {
+        FoodKind foodKind = food.foodKind;
+        if (foodKind == FoodKind.APPLE) {
+            score += 2;
+        } else if (foodKind == FoodKind.BANANA) {
+            score += 5;
+        } else if (foodKind == FoodKind.MOUSE) {
+            score += 10;
+        } else if (foodKind == FoodKind.ROCK) {
+            score -= 5;
+        } else if (foodKind == FoodKind.BANANA_PEEL) {
+            score -= 3;
+        }
+    }
+
     @Override
     public void update(double dt) {
         if(keyListener.isKeyPressed(KeyEvent.VK_W)){
@@ -30,10 +70,16 @@ public class Game extends Scene{
         } else if(keyListener.isKeyPressed(KeyEvent.VK_A)){
             snake.changeDirection(Direction.LEFT);
         }
-        if(!food.isSpawned) food.spawn();
+        if(!food.isSpawned) food.spawn(foodType);
 
         food.update(dt);
         snake.update(dt);
+
+        this.foodManager.update(dt);
+
+        if(snake.intersectingWithSelf() || snake.intersectingWithScreenBoundaries(snake.body[snake.head])){
+            gameOver();
+        }
     }
 
     @Override
@@ -51,5 +97,24 @@ public class Game extends Scene{
         snake.draw(g2);
         food.draw(g2);
 
+        this.foodManager.draw(g2);
+
+        // Draw the score
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Century Gothic", Font.ITALIC, 20));
+        g.drawString("Score: " + score, (int) (scoreboard.x + 30), (int) (scoreboard.y + 50));
+        g.drawString("Here is what each food is worth:", (int) (scoreboard.x + 30), (int) (scoreboard.y + 90));
+    }
+
+    public void gameOver() {
+        Window.getWindow().changeState(2);
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 }
