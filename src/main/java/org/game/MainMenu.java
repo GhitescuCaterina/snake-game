@@ -10,10 +10,10 @@ public class MainMenu extends Scene{
     public KeyListener keyListener;
     public MouseListener mouseListener;
 
-    public BufferedImage title, play, playPressed, exit, exitPressed, learn, learnPressed;
-    public Rect titleRect, playRect, learnRect, exitRect;
+    public BufferedImage title, play, playPressed, exit, exitPressed, about, aboutPressed, scores, scoresPressed;
+    public Rect titleRect, playRect, aboutRect, exitRect, scoresRect;
 
-    public BufferedImage playCurrentImage, exitCurrentImage, learnCurrentImage;
+    public BufferedImage playCurrentImage, exitCurrentImage, aboutCurrentImage, scoresCurrentImage;
 
     public MainMenu(KeyListener keyListener, MouseListener mouseListener){
         this.keyListener = keyListener;
@@ -22,23 +22,27 @@ public class MainMenu extends Scene{
             title = ImageIO.read(new File("pictures/title.png"));
             play = ImageIO.read(new File("pictures/start.png"));
             playPressed = ImageIO.read(new File("pictures/start-pressed.png"));
-            learn = ImageIO.read(new File("pictures/learn.png"));
-            learnPressed = ImageIO.read(new File("pictures/learn-pressed.png"));
+            about = ImageIO.read(new File("pictures/about.png"));
+            aboutPressed = ImageIO.read(new File("pictures/about-pressed.png"));
             exit = ImageIO.read(new File("pictures/exit.png"));
             exitPressed = ImageIO.read(new File("pictures/exit-pressed.png"));
+            scores = ImageIO.read(new File("pictures/scores.png"));
+            scoresPressed = ImageIO.read(new File("pictures/scores-pressed.png"));
 
         }catch(Exception e){
             e.printStackTrace();
         }
 
         playCurrentImage = play;
-        learnCurrentImage = learn;
+        aboutCurrentImage = about;
         exitCurrentImage = exit;
+        scoresCurrentImage = scores;
 
         titleRect = new Rect(320, 100, 600, 200, Direction.UP);
         playRect = new Rect(150, 350, 400, 200, Direction.UP);
-        learnRect = new Rect(800, 475, 300, 150, Direction.UP);
+        aboutRect = new Rect(800, 475, 300, 150, Direction.UP);
         exitRect = new Rect(525, 650, 250, 75, Direction.UP);
+        scoresRect = new Rect(400, 500, 250, 70, Direction.UP);
 
     }
     @Override
@@ -47,17 +51,20 @@ public class MainMenu extends Scene{
                 mouseListener.getY() >= playRect.y && mouseListener.getY() <= playRect.y + playRect.height) {
             playCurrentImage = playPressed;
             if(mouseListener.isPressed())
-                Window.getWindow().changeState(1);
+                Window.getWindow().changeState(3);
         }else{
             playCurrentImage = play;
         }
 
-        if(mouseListener.getX() >= learnRect.x && mouseListener.getX() <= learnRect.x + learnRect.width &&
-                mouseListener.getY() >= learnRect.y && mouseListener.getY() <= learnRect.y + learnRect.height) {
-            learnCurrentImage = learnPressed;
+        if(mouseListener.getX() >= aboutRect.x && mouseListener.getX() <= aboutRect.x + aboutRect.width &&
+                mouseListener.getY() >= aboutRect.y && mouseListener.getY() <= aboutRect.y + aboutRect.height) {
+            aboutCurrentImage = aboutPressed;
+
+            if(mouseListener.isPressed())
+                Window.getWindow().changeState(4);
 
         }else{
-            learnCurrentImage = learn;
+            aboutCurrentImage = about;
         }
 
         if(mouseListener.getX() >= exitRect.x && mouseListener.getX() <= exitRect.x + exitRect.width &&
@@ -69,45 +76,50 @@ public class MainMenu extends Scene{
             exitCurrentImage = exit;
         }
 
-        checkMouseAndSetCursor(playRect, playCurrentImage, playPressed);
-        checkMouseAndSetCursor(learnRect, learnCurrentImage, learnPressed);
-        checkMouseAndSetCursor(exitRect, exitCurrentImage, exitPressed);
+        if(mouseListener.getX() >= scoresRect.x && mouseListener.getX() <= scoresRect.y + scoresRect.width &&
+                mouseListener.getY() >= scoresRect.y && mouseListener.getY() <= scoresRect.y + scoresRect.height){
+            scoresCurrentImage = scoresPressed;
+        } else{
+            scoresCurrentImage = scores;
+        }
 
-        if(mouseListener.isPressed()) {
-            if (playCurrentImage == playPressed) {
-                Window.getWindow().changeState(1);
-            } else if (exitCurrentImage == exitPressed) {
-                Window.getWindow().close();
-            }
+        boolean isOverAnyButton = checkMouseAndSetCursor(playRect, playCurrentImage, playPressed);
+        isOverAnyButton = checkMouseAndSetCursor(aboutRect, aboutCurrentImage, aboutPressed) || isOverAnyButton;
+        isOverAnyButton = checkMouseAndSetCursor(exitRect, exitCurrentImage, exitPressed) || isOverAnyButton;
+        isOverAnyButton = checkMouseAndSetCursor(scoresRect, scoresCurrentImage, scoresPressed) || isOverAnyButton;
+
+        if (!isOverAnyButton) {
+            Window.getWindow().setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); // cursor normal
         }
     }
 
-    private void checkMouseAndSetCursor(Rect rect, BufferedImage currentImage, BufferedImage pressedImage) {
-        Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+    private boolean checkMouseAndSetCursor(Rect rect, BufferedImage currentImage, BufferedImage pressedImage) {
         Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
 
         if(mouseListener.getX() >= rect.x && mouseListener.getX() <= rect.x + rect.width &&
                 mouseListener.getY() >= rect.y && mouseListener.getY() <= rect.y + rect.height) {
             currentImage = pressedImage;
             Window.getWindow().setCursor(handCursor); // cursor pointer
-        } else {
-            Window.getWindow().setCursor(defaultCursor); // cursor normal
+            return true;
         }
+        return false;
     }
 
     @Override
     public void draw(Graphics g) {
-        g.setColor(new Color(95, 134, 59));
+        g.setColor(new Color(146, 151, 196));
         g.fillRect(0, 0 , Constant.SCREEN_WIDTH, Constant.SCREEN_HEIGHT);
 
         titleRect = new Rect((Constant.SCREEN_WIDTH - titleRect.width) / 2, 60, 630,300 , Direction.UP);
-        playRect = new Rect((Constant.SCREEN_WIDTH - playRect.width) / 2, 380, 800,100, Direction.UP );
-        learnRect = new Rect((Constant.SCREEN_WIDTH - learnRect.width) / 2, 480, 800,100, Direction.UP);
-        exitRect = new Rect((Constant.SCREEN_WIDTH - exitRect.width) / 2, 580, 800, 100, Direction.UP);
+        playRect = new Rect((Constant.SCREEN_WIDTH - playRect.width) / 2, 380, 500,100, Direction.UP );
+        aboutRect = new Rect((Constant.SCREEN_WIDTH - aboutRect.width) / 2, 580, 500,100, Direction.UP);
+        exitRect = new Rect((Constant.SCREEN_WIDTH - exitRect.width) / 2, 680, 500, 100, Direction.UP);
+        scoresRect = new Rect((Constant.SCREEN_WIDTH - scoresRect.width)/2, 480, 500, 100, Direction.UP);
 
         g.drawImage(title, (int)titleRect.x, (int)titleRect.y, (int)titleRect.width, (int)titleRect.height, null);
         g.drawImage(playCurrentImage, (int)playRect.x, (int)playRect.y, (int)playRect.width, (int)playRect.height, null);
-        g.drawImage(learnCurrentImage, (int)learnRect.x, (int)learnRect.y, (int)learnRect.width, (int)learnRect.height, null);
+        g.drawImage(scoresCurrentImage, (int)scoresRect.x, (int)scoresRect.y, (int)scoresRect.width, (int)scoresRect.height, null);
+        g.drawImage(aboutCurrentImage, (int)aboutRect.x, (int)aboutRect.y, (int)aboutRect.width, (int)aboutRect.height, null);
         g.drawImage(exitCurrentImage, (int)exitRect.x, (int)exitRect.y, (int)exitRect.width, (int)exitRect.height, null);
     }
 }

@@ -17,6 +17,8 @@ public class Game extends Scene{
     private FoodKind foodKind;
     private String playerName;
     private Rect rect;
+    private long startTime;
+    private long endTime;
     public Game(KeyListener keyListener){
         background = new Rect(0,0,Constant.SCREEN_WIDTH, Constant.SCREEN_HEIGHT, Direction.UP);
         foreground = new Rect(24, 48, Constant.TILE_WIDTH*25, Constant.TILE_WIDTH*25, Direction.UP);
@@ -31,18 +33,10 @@ public class Game extends Scene{
     }
 
     public void start() {
+        this.startTime = System.currentTimeMillis();
         food = new Food(foreground, snake, (int) Constant.TILE_WIDTH, (int) Constant.TILE_WIDTH, this);
         this.foodManager = new FoodManager(foreground, snake, (int) Constant.TILE_WIDTH, (int) Constant.TILE_WIDTH, this);
     }
-
-//    public void endGame() {
-//        String playerName = // get the player's name
-//        int playerScore = // get the player's score
-//
-//                scoreRepository.insertScore(playerName, playerScore);
-//
-//        //... rest of game over logic
-//    }
 
     public void incrementScore(Food food) {
         FoodKind foodKind = food.foodKind;
@@ -57,6 +51,10 @@ public class Game extends Scene{
         } else if (foodKind == FoodKind.BANANA_PEEL) {
             score -= 3;
         }
+    }
+
+    public int getPlayerScore() {
+        return score;
     }
 
     @Override
@@ -99,7 +97,6 @@ public class Game extends Scene{
 
         this.foodManager.draw(g2);
 
-        // Draw the score
         g.setColor(Color.BLACK);
         g.setFont(new Font("Century Gothic", Font.ITALIC, 20));
         g.drawString("Score: " + score, (int) (scoreboard.x + 30), (int) (scoreboard.y + 50));
@@ -107,7 +104,12 @@ public class Game extends Scene{
     }
 
     public void gameOver() {
+        this.endTime = System.currentTimeMillis();
         Window.getWindow().changeState(2);
+    }
+
+    public long timeTaken() {
+        return endTime - startTime;
     }
 
     public String getPlayerName() {

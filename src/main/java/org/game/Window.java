@@ -1,26 +1,30 @@
 package org.game;
 
 import javax.swing.*;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.*;
 
 public class Window extends JFrame implements Runnable {
 
     public static Window window = null;
-    public int curentState;
+    public int currentState;
     public Scene currentScene;
     public boolean isRunning = true;
     private GameOverScreen gameOverScreen;
+    private Game game;
+    private About about;
+    private NameInputScreen nameInputScreen;
     public KeyListener keyListener = new KeyListener();
     public MouseListener mouseListener = new MouseListener();
-    private Scene currentState;
-    public Window(int width ,int height, String title){
+
+    public Window(int width, int height, String title) {
         setSize(width, height);
         setTitle(title);
         setResizable(true);
         setVisible(true);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE );
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        game = new Game(keyListener);
+        window = this;
 
         isRunning = true;
         changeState(0);
@@ -28,30 +32,35 @@ public class Window extends JFrame implements Runnable {
         addMouseListener(mouseListener);
         addMouseMotionListener(mouseListener);
 
-        gameOverScreen = new GameOverScreen();
+        gameOverScreen = new GameOverScreen(mouseListener, keyListener);
+        about = new About(mouseListener, keyListener);
+
+        nameInputScreen = new NameInputScreen(game, window, mouseListener, keyListener);
     }
 
-    public static Window getWindow(){
-        if(Window.window == null){
+    public static Window getWindow() {
+        if (Window.window == null) {
             Window.window = new Window(Constant.SCREEN_WIDTH, Constant.SCREEN_HEIGHT, Constant.SCREEN_TITLE);
         }
 
         return Window.window;
     }
 
-    public void close(){
+    public void close() {
         isRunning = false;
     }
 
-    public void changeState(int newState){
-        curentState = newState;
-        switch (curentState) {
+    public void changeState(int newState) {
+        currentState = newState;
+        switch (currentState) {
             case 0 -> currentScene = new MainMenu(keyListener, mouseListener);
             case 1 -> {
                 currentScene = new Game(keyListener);
                 ((Game) currentScene).start();
             }
             case 2 -> currentScene = gameOverScreen;
+            case 3 -> currentScene = nameInputScreen;
+            case 4 -> currentScene = about;
         }
     }
 
@@ -60,7 +69,7 @@ public class Window extends JFrame implements Runnable {
         this.revalidate();
     }
 
-    public void update(double dt){
+    public void update(double dt) {
         Image dbImage = createImage(getWidth(), getHeight());
         Graphics dbg = dbImage.getGraphics();
 
@@ -68,32 +77,32 @@ public class Window extends JFrame implements Runnable {
         getGraphics().drawImage(dbImage, 0, 0, this);
 
         currentScene.update(dt);
-        if (curentState == 2) {
-            gameOverScreen.update();
+        if (currentState == 2) {
+            gameOverScreen.update(dt);
         }
     }
 
-    public void draw(Graphics g){
-        Graphics2D g2= (Graphics2D)g;
-        currentScene.draw(g);
+    public void draw(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        currentScene.draw(g2d);
 
-        if (curentState == 2) {
-            gameOverScreen.draw(g2);
+        if (currentState == 2) {
+            gameOverScreen.draw(g2d);
         }
     }
 
     @Override
     public void run() {
         double lastFrameTime = 0.0;
-        try{
-            while(isRunning){
+        try {
+            while (isRunning) {
                 double time = Time.getTime();
                 double deltaTime = time - lastFrameTime;
                 lastFrameTime = time;
 
                 update(deltaTime);
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

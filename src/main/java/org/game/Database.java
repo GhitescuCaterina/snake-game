@@ -5,7 +5,8 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 public class Database {
-    static Connection c = null;
+
+     static Connection c = null;
     static Statement stmt = null;
 
     public static void main( String args[] ) {
