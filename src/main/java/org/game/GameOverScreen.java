@@ -10,9 +10,9 @@ public class GameOverScreen extends Scene {
 
     private BufferedImage retry, exit, retryPressed, exitPressed, back, backPressed;
     private MouseListener mouseListener;
-    public KeyListener keyListener;
     public BufferedImage exitCurrentImage, retryCurrentImage, backCurrentImage;
     public Rect exitRect, retryRect, backRect;
+    public KeyboardListener keyboardListener;
 
     public GameOverScreen(MouseListener mouseListener, KeyListener keyListener) {
         try {
@@ -26,7 +26,7 @@ public class GameOverScreen extends Scene {
             e.printStackTrace();
         }
         this.mouseListener = mouseListener;
-        this.keyListener = keyListener;
+        this.keyboardListener = keyboardListener;
 
         exitCurrentImage = exit;
         retryCurrentImage = retry;
@@ -97,7 +97,7 @@ public class GameOverScreen extends Scene {
         g.fillRect(0, 0 , Constant.SCREEN_WIDTH, Constant.SCREEN_HEIGHT);
 
         g.setColor(new Color(30, 100, 81));
-        g2d.setFont(new Font("MineCrafter", Font.BOLD, 70));
+        g2d.setFont(new Font("Century Gothic", Font.BOLD, 70));
         g2d.drawString("You lost! :(", (Constant.SCREEN_WIDTH)/2 - 180, 200);
         g2d.drawString("What do you wanna do now?", (Constant.SCREEN_WIDTH)/2 - 500, 300);
 

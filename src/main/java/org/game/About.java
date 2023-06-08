@@ -5,18 +5,17 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.security.Key;
 
 public class About extends Scene{
 
     private MouseListener mouseListener;
-    public KeyListener keyListener;
     private BufferedImage back, backPressed, backCurrentImage;
     public Rect backRect;
+    public KeyboardListener keyboardListener;
 
     public About(MouseListener mouseListener, KeyListener keyListener){
         this.mouseListener = mouseListener;
-        this.keyListener = keyListener;
+        this.keyboardListener = keyboardListener;
         try{
             back = ImageIO.read(new File("pictures/back.png"));
             backPressed = ImageIO.read(new File("pictures/back-pressed.png"));
@@ -29,8 +28,6 @@ public class About extends Scene{
     }
     @Override
     public void update(double dt) {
-
-
 
         if(mouseListener.getX() >= backRect.x && mouseListener.getX() <= backRect.x + backRect.width &&
                 mouseListener.getY() >= backRect.y && mouseListener.getY() <= backRect.y + backRect.height) {
@@ -49,6 +46,16 @@ public class About extends Scene{
 
         g.setColor(new Color(146, 151, 196));
         g.fillRect(0, 0 , Constant.SCREEN_WIDTH, Constant.SCREEN_HEIGHT);
+
+        g.setColor(new Color(30, 100, 81));
+        g2d.setFont(new Font("Century Gothic", Font.ITALIC, 30));
+        g2d.drawString("I tried to recreate", (Constant.SCREEN_WIDTH)/2 - 140, 220);
+        g2d.drawString("one of my favorite childhood games.", (Constant.SCREEN_WIDTH)/2 - 300, 260);
+        g2d.drawString("Here are the brief rules!", (Constant.SCREEN_WIDTH)/2 - 200, 300);
+        g2d.drawString("The good foods are apples, bananas and mice.", (Constant.SCREEN_WIDTH)/2 - 350, 340);
+        g2d.drawString("The bad foods are rocks and banana peels.", (Constant.SCREEN_WIDTH)/2 - 330, 380);
+        g2d.drawString("Try and get the biggest highscore!", (Constant.SCREEN_WIDTH)/2 - 270, 420);
+        g2d.drawString("Good luck!", (Constant.SCREEN_WIDTH)/2 - 100, 460);
 
         backRect = new Rect((Constant.SCREEN_WIDTH - backRect.width) / 2, (Constant.SCREEN_HEIGHT - backRect.height)/2 + 150, 324, 120, Direction.UP);
         g.drawImage(backCurrentImage, (int)backRect.x, (int)backRect.y, (int)backRect.width, (int)backRect.height, null);

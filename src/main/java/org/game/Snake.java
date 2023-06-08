@@ -11,7 +11,6 @@ import java.io.IOException;
 public class Snake {
     public Rect[] body = new Rect[100];
     public double bodyWidth, bodyHeight;
-    MouseListener mouseListener;
     public int size;
     public int tail = 0;
     public int head = 0;
@@ -20,7 +19,6 @@ public class Snake {
     public double ogWaitBetweenUpdates = 0.075f;
     public double waitTimeLeft = ogWaitBetweenUpdates;
     public Rect background;
-    //Rect newBodyPiece = new Rect(newX, newY, bodyWidth, bodyHeight, direction);
     BufferedImage headImage, bodyImage, tailImage, archedBodyImage;
     private Game game;
     private int badFoodsEatenInARow;
@@ -65,47 +63,62 @@ public class Snake {
         }
     }
 
-    public void update(double dt){
+    public void update(double dt) {
 
-        body[head].direction = direction;
-
-        if(waitTimeLeft > 0){
+        if (waitTimeLeft > 0) {
             waitTimeLeft -= dt;
             return;
         }
 
-        if(intersectingWithSelf()){
+        if (intersectingWithSelf()) {
             Window.getWindow().changeState(0);
         }
 
-        waitTimeLeft= ogWaitBetweenUpdates;
-        double newX= 0;
+        waitTimeLeft = ogWaitBetweenUpdates;
+        double newX = 0;
         double newY = 0;
 
-        if(direction == Direction.RIGHT){
+        if (direction == Direction.RIGHT) {
             newX = body[head].x + bodyWidth;
             newY = body[head].y;
-        }else if (direction == Direction.LEFT){
+        } else if (direction == Direction.LEFT) {
             newX = body[head].x - bodyWidth;
             newY = body[head].y;
-        }
-        else if (direction == Direction.UP){
+        } else if (direction == Direction.UP) {
             newX = body[head].x;
             newY = body[head].y - bodyHeight;
-        }
-        else if (direction == Direction.DOWN){
+        } else if (direction == Direction.DOWN) {
             newX = body[head].x;
             newY = body[head].y + bodyHeight;
         }
 
         body[(head + 1) % body.length] = body[tail];
         body[tail] = null;
-        head = (head + 1) % body.length;
         tail = (tail + 1) % body.length;
+        head = (head + 1) % body.length;
+
+        Direction previousDirection = body[head].direction;
 
         body[head] = new Rect(newX, newY, bodyWidth, bodyHeight, direction);
+        body[head].direction = direction;
 
+        if (direction != previousDirection) {
+            int indexBeforeHead = (head - 1 + body.length) % body.length;
+            body[indexBeforeHead].turn = calculateTurn(previousDirection, direction); // Assign the correct turn
+        }
 
+    }
+
+    public Turn calculateTurn(Direction prevDirection, Direction curDirection) {
+        if (prevDirection == Direction.UP && curDirection == Direction.LEFT || prevDirection == Direction.DOWN && curDirection == Direction.RIGHT ||
+                prevDirection == Direction.LEFT && curDirection == Direction.DOWN || prevDirection == Direction.RIGHT && curDirection == Direction.UP) {
+            return Turn.LEFT;
+        } else if (prevDirection == Direction.UP && curDirection == Direction.RIGHT || prevDirection == Direction.DOWN && curDirection == Direction.LEFT ||
+                prevDirection == Direction.LEFT && curDirection == Direction.UP || prevDirection == Direction.RIGHT && curDirection == Direction.DOWN) {
+            return Turn.RIGHT;
+        } else {
+            return Turn.STRAIGHT;
+        }
     }
 
     public boolean intersectingWithSelf(){
@@ -132,15 +145,13 @@ public class Snake {
         if(direction == Direction.RIGHT){
             newX = body[tail].x - bodyWidth;
             newY = body[tail].y;
-        }else if (direction == Direction.LEFT){
+        } else if (direction == Direction.LEFT){
             newX = body[tail].x + bodyWidth;
             newY = body[tail].y;
-        }
-        else if (direction == Direction.UP){
+        } else if (direction == Direction.UP){
             newX = body[tail].x;
             newY = body[tail].y + bodyHeight;
-        }
-        else if (direction == Direction.DOWN){
+        } else if (direction == Direction.DOWN){
             newX = body[tail].x;
             newY = body[tail].y - bodyHeight;
         }
@@ -156,7 +167,6 @@ public class Snake {
         body[tail] = newBodyPiece;
 
         newBodyPiece.turn = Turn.STRAIGHT;
-        resetBadFoodEatenCount();
     }
 
     public boolean intersecting(Rect r1, Rect r2) {
@@ -218,12 +228,13 @@ public class Snake {
             } else if (i == (head - 1 + body.length) % body.length) {
                 BufferedImage resizedHeadImage = resizeImage(rotateImage(headImage, directionToDegrees(piece.direction)), (int) bodyWidth, (int) bodyHeight);
                 g2.drawImage(resizedHeadImage, (int) piece.x, (int) piece.y, null);
-            } else if (nextPiece != null && piece.direction != nextPiece.direction) {  // We draw the arched body image if the snake is turning
-                int turnAngle = calculateTurnAngle(piece.direction, nextPiece.direction);
+            } else if (piece.turn != Turn.STRAIGHT) {  // We draw the arched body image if the snake is turning
+                int turnAngle = calculateTurnAngle(piece.direction, piece.direction);
                 BufferedImage rotatedArchedBodyImage = rotateImage(archedBodyImage, -turnAngle);
                 BufferedImage resizedArchedBodyImage = resizeImage(rotatedArchedBodyImage, (int) bodyWidth, (int) bodyHeight);
 
                 g2.drawImage(resizedArchedBodyImage, (int) piece.x, (int) piece.y, null);
+                piece.turn = Turn.STRAIGHT;  // Clear the turn after it's been drawn
             } else {
                 BufferedImage resizedBodyImage = resizeImage(rotateImage(bodyImage, directionToDegrees(piece.direction)), (int) bodyWidth, (int) bodyHeight);
                 g2.drawImage(resizedBodyImage, (int) piece.x, (int) piece.y, null);
@@ -239,12 +250,11 @@ public class Snake {
         } else {
             this.game.gameOver();
         }
-        addBadFoodEaten();
     }
 
     public void addBadFoodEaten() {
         this.badFoodsEatenInARow++;
-        if (this.badFoodsEatenInARow >= 3) {
+        if (this.badFoodsEatenInARow > 3) {
             this.game.gameOver();
         }
     }

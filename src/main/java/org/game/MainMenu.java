@@ -12,12 +12,13 @@ public class MainMenu extends Scene{
 
     public BufferedImage title, play, playPressed, exit, exitPressed, about, aboutPressed, scores, scoresPressed;
     public Rect titleRect, playRect, aboutRect, exitRect, scoresRect;
-
+    private Game game;
     public BufferedImage playCurrentImage, exitCurrentImage, aboutCurrentImage, scoresCurrentImage;
 
-    public MainMenu(KeyListener keyListener, MouseListener mouseListener){
+    public MainMenu(KeyListener keyListener, MouseListener mouseListener, Game game) {
         this.keyListener = keyListener;
         this.mouseListener = mouseListener;
+        this.game = game;
         try{
             title = ImageIO.read(new File("pictures/title.png"));
             play = ImageIO.read(new File("pictures/start.png"));
@@ -47,12 +48,19 @@ public class MainMenu extends Scene{
     }
     @Override
     public void update(double dt) {
-        if(mouseListener.getX() >= playRect.x && mouseListener.getX() <= playRect.x + playRect.width &&
+        if (mouseListener.getX() >= playRect.x && mouseListener.getX() <= playRect.x + playRect.width &&
                 mouseListener.getY() >= playRect.y && mouseListener.getY() <= playRect.y + playRect.height) {
             playCurrentImage = playPressed;
-            if(mouseListener.isPressed())
-                Window.getWindow().changeState(3);
-        }else{
+            if (mouseListener.isPressed()) {
+                InputDialog inputDialog = new InputDialog(Window.getWindow(), game); // Pass the game instance
+                inputDialog.setVisible(true);
+
+                // Start the game after the input dialog is closed
+                if (!inputDialog.isVisible()) {
+                    Window.getWindow().changeState(1);
+                }
+            }
+        } else {
             playCurrentImage = play;
         }
 
@@ -76,10 +84,13 @@ public class MainMenu extends Scene{
             exitCurrentImage = exit;
         }
 
-        if(mouseListener.getX() >= scoresRect.x && mouseListener.getX() <= scoresRect.y + scoresRect.width &&
-                mouseListener.getY() >= scoresRect.y && mouseListener.getY() <= scoresRect.y + scoresRect.height){
+        if (mouseListener.getX() >= scoresRect.x && mouseListener.getX() <= scoresRect.x + scoresRect.width &&
+                mouseListener.getY() >= scoresRect.y && mouseListener.getY() <= scoresRect.y + scoresRect.height) {
             scoresCurrentImage = scoresPressed;
-        } else{
+            if (mouseListener.isPressed()) {
+                Window.getWindow().changeState(5);
+            }
+        } else {
             scoresCurrentImage = scores;
         }
 

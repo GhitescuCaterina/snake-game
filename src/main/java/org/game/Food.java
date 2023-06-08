@@ -10,7 +10,6 @@ import java.util.List;
 
 public class Food {
     public Rect background;
-    MouseListener mouseListener;
     private Snake snake;
     public int width, height;
     public Rect rect;
@@ -22,8 +21,6 @@ public class Food {
     private BufferedImage currentImage;
     private Random random;
     private Game game;
-    private Food food;
-    public int imageScaleFactor = 5;
     BufferedImage apple, banana, banana_peel, rock, mouse;
     private Map<FoodKind, BufferedImage> foodImages = new HashMap<>();
     FoodKind foodKind;
@@ -35,7 +32,6 @@ public class Food {
         this.height = height;
         this.game = game;
         this.rect = new Rect(0, 0, width, height, snake.direction);
-        this.foodType = foodType;
         goodFood = new ArrayList<>();
         badFood = new ArrayList<>();
 
@@ -100,12 +96,10 @@ public class Food {
                 snake.resetBadFoodEatenCount();
             } else if(foodType == FoodType.BAD){
                 snake.shrink();
-                game.incrementScore(this);
                 snake.addBadFoodEaten();
+                game.incrementScore(this);
             }
-            this.rect.x = -100;
-            this.rect.y = -100;
-            isSpawned = false;
+            this.isSpawned = false;
         }
     }
 

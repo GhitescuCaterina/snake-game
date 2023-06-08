@@ -20,13 +20,4 @@ public class KeyboardListener implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
     }
-
-    public boolean hasNewKeyPress() {
-        return newKeyPress;
-    }
-
-    public char getLastKeyPressed() {
-        newKeyPress = false;
-        return lastKeyPressed;
-    }
 }

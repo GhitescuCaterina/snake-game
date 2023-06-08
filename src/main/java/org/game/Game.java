@@ -6,7 +6,6 @@ import java.awt.geom.Rectangle2D;
 
 public class Game extends Scene{
     KeyListener keyListener;
-    private ScoreRepository scoreRepository;
     Rect background, foreground, scoreboard;
     private Snake snake;
     public Food food;
@@ -14,9 +13,7 @@ public class Game extends Scene{
     private FoodManager foodManager;
     private FoodType foodType;
     private int score = 0;
-    private FoodKind foodKind;
     private String playerName;
-    private Rect rect;
     private long startTime;
     private long endTime;
     public Game(KeyListener keyListener){
@@ -29,7 +26,6 @@ public class Game extends Scene{
         food = new Food(foreground, snake, (int) Constant.TILE_WIDTH, (int) Constant.TILE_WIDTH, this);
         if(!food.isSpawned) food.spawn(foodType);
 
-        scoreRepository = new ScoreRepository();
     }
 
     public void start() {
@@ -47,15 +43,13 @@ public class Game extends Scene{
         } else if (foodKind == FoodKind.MOUSE) {
             score += 10;
         } else if (foodKind == FoodKind.ROCK) {
-            score -= 5;
+            score -= 50;
         } else if (foodKind == FoodKind.BANANA_PEEL) {
-            score -= 3;
+            score -= 30;
         }
     }
 
-    public int getPlayerScore() {
-        return score;
-    }
+
 
     @Override
     public void update(double dt) {
@@ -99,24 +93,35 @@ public class Game extends Scene{
 
         g.setColor(Color.BLACK);
         g.setFont(new Font("Century Gothic", Font.ITALIC, 20));
-        g.drawString("Score: " + score, (int) (scoreboard.x + 30), (int) (scoreboard.y + 50));
-        g.drawString("Here is what each food is worth:", (int) (scoreboard.x + 30), (int) (scoreboard.y + 90));
+        g.drawString("Score: " + score, (int) (scoreboard.x + 30), (int) (scoreboard.y + 260));
+        g.drawString("Here is what each food is worth:", (int) (scoreboard.x + 30), (int) (scoreboard.y + 290));
+
+        g.setFont(new Font("Century Gothic", Font.BOLD, 15));
+        g.drawString("apple -> 2 point (are they really good?)", (int) (scoreboard.x + 30), (int) (scoreboard.y + 320));
+        g.drawString("bananas -> 3 points (these are healthier)", (int) (scoreboard.x + 30), (int) (scoreboard.y + 350));
+        g.drawString("mice -> 5 points (ew, but snakes like them)", (int) (scoreboard.x + 30), (int) (scoreboard.y + 380));
+        g.drawString("banana peels -> -30 points (very slippy)", (int) (scoreboard.x + 30), (int) (scoreboard.y + 410));
+        g.drawString("rocks -> -50 points (really? rocks?)", (int) (scoreboard.x + 30), (int) (scoreboard.y + 440));
+
+
+    }
+    public int timeTaken() {
+        return (int) (endTime - startTime);
+    }
+
+    public boolean isGameOver() {
+        return endTime > 0;
     }
 
     public void gameOver() {
         this.endTime = System.currentTimeMillis();
         Window.getWindow().changeState(2);
+        System.out.println((endTime - startTime) / 1000);
+        System.out.println(score);
+    }
+    public int getPlayerScore() {
+        return score;
     }
 
-    public long timeTaken() {
-        return endTime - startTime;
-    }
 
-    public String getPlayerName() {
-        return playerName;
-    }
-
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
-    }
 }

@@ -12,9 +12,9 @@ public class Window extends JFrame implements Runnable {
     private GameOverScreen gameOverScreen;
     private Game game;
     private About about;
-    private NameInputScreen nameInputScreen;
     public KeyListener keyListener = new KeyListener();
     public MouseListener mouseListener = new MouseListener();
+    private Scores scores;
 
     public Window(int width, int height, String title) {
         setSize(width, height);
@@ -34,8 +34,8 @@ public class Window extends JFrame implements Runnable {
 
         gameOverScreen = new GameOverScreen(mouseListener, keyListener);
         about = new About(mouseListener, keyListener);
+        scores = new Scores(mouseListener, keyListener);
 
-        nameInputScreen = new NameInputScreen(game, window, mouseListener, keyListener);
     }
 
     public static Window getWindow() {
@@ -46,6 +46,7 @@ public class Window extends JFrame implements Runnable {
         return Window.window;
     }
 
+
     public void close() {
         isRunning = false;
     }
@@ -53,20 +54,15 @@ public class Window extends JFrame implements Runnable {
     public void changeState(int newState) {
         currentState = newState;
         switch (currentState) {
-            case 0 -> currentScene = new MainMenu(keyListener, mouseListener);
+            case 0 -> currentScene = new MainMenu(keyListener, mouseListener, game);
             case 1 -> {
-                currentScene = new Game(keyListener);
-                ((Game) currentScene).start();
+                currentScene = game;
+                game.start();
             }
             case 2 -> currentScene = gameOverScreen;
-            case 3 -> currentScene = nameInputScreen;
             case 4 -> currentScene = about;
+            case 5 -> { currentScene = scores; break; }
         }
-    }
-
-    public void changePanel(JPanel newPanel) {
-        this.setContentPane(newPanel);
-        this.revalidate();
     }
 
     public void update(double dt) {

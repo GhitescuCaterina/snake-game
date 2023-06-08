@@ -10,7 +10,6 @@ public class KeyListener extends KeyAdapter implements java.awt.event.KeyListene
     private KeyboardListener keyboardListener;
 
     public KeyListener() {
-        // Initialize the keyboardListener instance
         keyboardListener = new KeyboardListener();
     }
 
@@ -44,16 +43,16 @@ public class KeyListener extends KeyAdapter implements java.awt.event.KeyListene
         return false;
     }
 
-    public boolean hasNewKeyPress() {
-        return newKeyPress;
-    }
-
-    public char getLastKeyPressed() {
-        newKeyPress = false;
-        return lastKeyPressed;
-    }
-
-    public KeyboardListener getKeyboardListener() {
-        return keyboardListener;
-    }
+//    public boolean hasNewKeyPress() {
+//        return newKeyPress;
+//    }
+//
+//    public char getLastKeyPressed() {
+//        newKeyPress = false;
+//        return lastKeyPressed;
+//    }
+//
+//    public KeyboardListener getKeyboardListener() {
+//        return keyboardListener;
+//    }
 }
